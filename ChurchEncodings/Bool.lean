@@ -1,6 +1,8 @@
 namespace Church
 
-def CBool.{u} : Type (u + 1) :=
+universe u
+
+def CBool : Type (u + 1) :=
   ∀ {α : Type u}, α → α → α
 
 namespace CBool
@@ -21,7 +23,7 @@ def not (p : CBool) : CBool :=
   fun a b => p b a
 
 def xor (p q : CBool) : CBool :=
-  fun a b => p (p b a) (q a b)
+  fun a b => p (q b a) (q a b)
 
 def nand (p q : CBool) : CBool :=
   fun a b => p (q b a) a
@@ -40,42 +42,56 @@ def unchurch (b : CBool) : Bool :=
 
 end CBool
 
+end Church
+
 /-
   Some sanity checks
 -/
 
+open Church.CBool
+
 -- Or
-#eval CBool.unchurch (CBool.or CBool.true CBool.true)
-#eval CBool.unchurch (CBool.or CBool.true CBool.false)
-#eval CBool.unchurch (CBool.or CBool.false CBool.true)
-#eval CBool.unchurch (CBool.or CBool.false CBool.false)
+example :
+  (unchurch (or true true)   == Bool.true) &&
+  (unchurch (or true false)  == Bool.true) &&
+  (unchurch (or false true)  == Bool.true) &&
+  (unchurch (or false false) == Bool.false) = Bool.true
+:= rfl
 
 -- And
-#eval CBool.unchurch (CBool.and CBool.true CBool.true)
-#eval CBool.unchurch (CBool.and CBool.true CBool.false)
-#eval CBool.unchurch (CBool.and CBool.false CBool.true)
-#eval CBool.unchurch (CBool.and CBool.false CBool.false)
+example :
+  (unchurch (and true true)   == Bool.true)  &&
+  (unchurch (and true false)  == Bool.false) &&
+  (unchurch (and false true)  == Bool.false) &&
+  (unchurch (and false false) == Bool.false) = Bool.true
+:= rfl
 
 -- Not
-#eval CBool.unchurch (CBool.not CBool.true)
-#eval CBool.unchurch (CBool.not CBool.false)
+example :
+  (unchurch (not true) == Bool.false) &&
+  (unchurch (not false) == Bool.true) = Bool.true
+:= rfl
 
 -- Xor
-#eval CBool.unchurch (CBool.xor CBool.true CBool.true)
-#eval CBool.unchurch (CBool.xor CBool.true CBool.false)
-#eval CBool.unchurch (CBool.xor CBool.false CBool.true)
-#eval CBool.unchurch (CBool.xor CBool.false CBool.false)
+example :
+  (unchurch (xor true true)   == Bool.false) &&
+  (unchurch (xor true false)  == Bool.true)  &&
+  (unchurch (xor false true)  == Bool.true)  &&
+  (unchurch (xor false false) == Bool.false) = Bool.true
+:= rfl
 
 -- Nand
-#eval CBool.unchurch (CBool.nand CBool.true CBool.true)
-#eval CBool.unchurch (CBool.nand CBool.true CBool.false)
-#eval CBool.unchurch (CBool.nand CBool.false CBool.true)
-#eval CBool.unchurch (CBool.nand CBool.false CBool.false)
+example :
+  (unchurch (nand true true)   == Bool.false) &&
+  (unchurch (nand true false)  == Bool.true)  &&
+  (unchurch (nand false true)  == Bool.true)  &&
+  (unchurch (nand false false) == Bool.true) = Bool.true
+:= rfl
 
 -- Implies
-#eval CBool.unchurch (CBool.implies CBool.true CBool.true)
-#eval CBool.unchurch (CBool.implies CBool.true CBool.false)
-#eval CBool.unchurch (CBool.implies CBool.false CBool.true)
-#eval CBool.unchurch (CBool.implies CBool.false CBool.false)
-
-end Church
+example :
+  (unchurch (implies true true)   == Bool.true) &&
+  (unchurch (implies true false)  == Bool.false)  &&
+  (unchurch (implies false true)  == Bool.true)  &&
+  (unchurch (implies false false) == Bool.true) = Bool.true
+:= rfl
